@@ -32,11 +32,10 @@ class Client:
         Return filter for Service type
         """
         filters = {'type': 'Service'}
+        service_part = 'match("{}", service.name)'.format(servicename)
         if hostname:
-            service_part = 'host.name=="{}" && match("{}", service.name)'.format(
-                hostname, servicename)
-        else:
-            service_part = 'service.name=="{}"'.format(servicename)
+            host_part = 'host.name=="{}"'.format(hostname)
+            service_part = host_part + ' && ' + service_part
         filters['filter'] = service_part
         return filters
 
@@ -88,7 +87,7 @@ class Client:
                 now = time.time()
                 end_time = now + duration
                 results = []
-                with Timeout(8):
+                with Timeout(20):
                     try_count = try_count + 1
                     host_task = client.actions.schedule_downtime(
                         filters=service_filter,
