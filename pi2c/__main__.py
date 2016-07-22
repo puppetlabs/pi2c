@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-import pi2
+import pi2c
 
 
 def get_args():
@@ -11,7 +11,6 @@ def get_args():
     parser = argparse.ArgumentParser(description='Set downtime with icinga2')
 
     parser.add_argument('-H', '--host',
-                        required=True,
                         action='store',
                         help='Host to set downtime for')
 
@@ -51,26 +50,44 @@ def get_args():
                         default='icinga2',
                         help='Author of downtime')
 
+    parser.add_argument('-S', '--service',
+                        action='store',
+                        help='Name of service to set downtime for')
+
     args = parser.parse_args()
     return args
 
 
 def main():
     try:
-        c = pi2.client.Client()
+        c = pi2c.client.Client()
         args = get_args()
         connection = c.open_connection(
             args.server, args.user, args.password)
-        set_downtime = c.schedule_host_downtime(
-            connection, args.host, args.comment, args.author, args.duration)
-        if len(set_downtime['results']) == 1:
-            if set_downtime['results'][0]['code'] == 200.0:
-                result = set_downtime['results'][0]['status']
-            else:
-                result = 'Cannot set downtime for {}. Received code {}'.format(
-                    args.host, set_downtime['results'][0]['code'])
+        if args.service:
+            set_downtime = c.schedule_service_downtime(
+                connection, args.comment, args.author, args.duration, args.service, args.host)
         else:
-            result = 'Cannot set downtime for {}'.format(args.host)
+            set_downtime = c.schedule_host_downtime(
+                connection, args.host, args.comment, args.author, args.duration)
+        if set_downtime:
+            if args.host:
+                if args.service:
+                    result = 'Successfully set downtime for {} on {}'.format(
+                        args.service, args.host)
+                else:
+                    result = 'Successfully set downtime for {} and {} services'.format(
+                        args.host, len(set_downtime) - 1)
+            else:
+                result = 'Successfully set downtime for {} instances of {}'.format(
+                    len(set_downtime), args.service)
+        else:
+            if args.service:
+                result = 'Cannot set downtime for service {}'.format(args.service)
+                if args.host:
+                    result = result + ' on {}'.format(args.host)
+            else:
+                result = 'Cannot set downtime for {}'.format(args.host)
         print result
     except:
         raise
