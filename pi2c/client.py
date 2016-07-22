@@ -23,7 +23,7 @@ class Client:
         """
         filters = {
             'type': 'Host',
-            'filter': 'host.name=="{}"'.format(hostname),
+            'filter': 'match("{}", host.name)'.format(hostname),
         }
         return filters
 
@@ -34,7 +34,7 @@ class Client:
         filters = {'type': 'Service'}
         service_part = 'match("{}", service.name)'.format(servicename)
         if hostname:
-            host_part = 'host.name=="{}"'.format(hostname)
+            host_part = 'match("{}", host.name)'.format(hostname)
             service_part = host_part + ' && ' + service_part
         filters['filter'] = service_part
         return filters
