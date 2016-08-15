@@ -2,6 +2,7 @@
 
 import argparse
 import pi2c
+import json
 
 
 def get_args():
@@ -54,6 +55,11 @@ def get_args():
                         action='store',
                         help='Name of service to set downtime for')
 
+    parser.add_argument('-f', '--filter',
+                        action='store',
+                        type=json.loads,
+                        help='Icinga2 filter. Overrides service and host.')
+
     args = parser.parse_args()
     return args
 
@@ -64,30 +70,30 @@ def main():
         args = get_args()
         connection = c.open_connection(
             args.server, args.user, args.password)
-        if args.service:
+        if args.filter:
+            set_downtime = c.schedule_downtime(
+                connection, args.filter, args.comment, args.author, args.duration)
+        elif args.service:
             set_downtime = c.schedule_service_downtime(
                 connection, args.comment, args.author, args.duration, args.service, args.host)
         else:
             set_downtime = c.schedule_host_downtime(
                 connection, args.host, args.comment, args.author, args.duration)
         if set_downtime:
-            if args.host:
-                if args.service:
-                    result = 'Successfully set downtime for {} on {}'.format(
-                        args.service, args.host)
-                else:
-                    result = 'Successfully set downtime for {} and {} services'.format(
-                        args.host, len(set_downtime) - 1)
-            else:
+            if args.filter:
+                result = 'Successfully set downtime with {} filter {}'.format(
+                    args.filter['type'].lower(), args.filter['filter'])
+            elif args.service:
                 result = 'Successfully set downtime for {} instances of {}'.format(
                     len(set_downtime), args.service)
-        else:
-            if args.service:
-                result = 'Cannot set downtime for service {}'.format(args.service)
-                if args.host:
-                    result = result + ' on {}'.format(args.host)
             else:
-                result = 'Cannot set downtime for {}'.format(args.host)
+                result = 'Successfully set downtime for {}'.format(args.host)
+        else:
+            if args.filter:
+                result = 'Cannot set downtime with {} filter {}'.format(
+                    args.filter['type'], args.filter['filter'])
+            else:
+                result = 'Cannot set downtime'
         print result
     except:
         raise

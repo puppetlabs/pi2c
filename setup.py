@@ -3,12 +3,16 @@ from setuptools import setup, find_packages
 
 setup(
     name='pi2c',
-    version='0.1.10',
+    version='0.1.16',
     packages=find_packages(),
-    install_requires=['python-icinga2api'],
+    install_requires=[
+        'python-icinga2api',
+        'plupdates',
+        ],
     entry_points={
         'console_scripts': [
-            'pi2c = pi2c.__main__:main'
+            'pi2c = pi2c.__main__:main',
+            'verify_down = pi2c.verify_down:main',
         ]
     },
     author='Matt Kirby',
