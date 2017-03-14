@@ -44,7 +44,7 @@ def get_args():
                         action='store',
                         default=600,
                         type=int,
-                        help='Duration for downtime')
+                        help='Duration for downtime, in seconds (default: 600s)')
 
     parser.add_argument('-a', '--author',
                         action='store',
