@@ -64,12 +64,14 @@ class Client:
                 if try_count == 3:
                     return 'Operation timed out'
 
-    def schedule_host_downtime(self, client, host, comment, author, duration=600):
+    def schedule_host_downtime(self, client, host, comment, author, duration=600, services=False):
         """
         Schedule host downtime for duration
         """
         host_filter = self.host_filter(host)
         downtime = self.schedule_downtime(client, "Host", host_filter, comment, author, duration)
+        if services:
+            self.schedule_downtime(client, "Service", host_filter, comment, author, duration)
         return downtime
 
     def schedule_service_downtime(self, client, comment, author,

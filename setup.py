@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pi2c',
-    version='0.1.17',
+    version='0.1.18',
     packages=find_packages(),
     install_requires=[
         'python-icinga2api>=0.3.0.1',

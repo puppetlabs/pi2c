@@ -15,6 +15,10 @@ def get_args():
                         action='store',
                         help='Host to set downtime for')
 
+    parser.add_argument('-O', '--host-only',
+                        action='store_true',
+                        help='Only set downtime for the host, not the services (only used with -H)')
+
     parser.add_argument('-s', '--server',
                         action='store',
                         help='Icinga server to connect to',
@@ -78,7 +82,8 @@ def main():
                 connection, args.comment, args.author, args.duration, args.service, args.host)
         else:
             set_downtime = c.schedule_host_downtime(
-                connection, args.host, args.comment, args.author, args.duration)
+                connection, args.host, args.comment, args.author, args.duration,
+                services=not args.host_only)
         if set_downtime:
             if args.filter:
                 result = 'Successfully set downtime with {} filter {}'.format(
@@ -88,6 +93,8 @@ def main():
                     len(set_downtime), args.service)
             else:
                 result = 'Successfully set downtime for {}'.format(args.host)
+                if not args.host_only:
+                    result += ' and its services'
         else:
             if args.filter:
                 result = 'Cannot set downtime with {} filter {}'.format(
