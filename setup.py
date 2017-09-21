@@ -3,11 +3,11 @@ from setuptools import setup, find_packages
 
 setup(
     name='pi2c',
-    version='0.1.16',
+    version='0.1.17',
     packages=find_packages(),
     install_requires=[
-        'python-icinga2api',
-        'plupdates',
+        'python-icinga2api>=0.3.0.1',
+        'requests',
         ],
     entry_points={
         'console_scripts': [

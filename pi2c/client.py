@@ -21,25 +21,19 @@ class Client:
         """
         Return a filter
         """
-        filters = {
-            'type': 'Host',
-            'filter': 'match("{}", host.name)'.format(hostname),
-        }
-        return filters
+        return 'match("{}", host.name)'.format(hostname)
 
     def service_filter(self, servicename, hostname=None):
         """
         Return filter for Service type
         """
-        filters = {'type': 'Service'}
         service_part = 'match("{}", service.name)'.format(servicename)
         if hostname:
             host_part = 'match("{}", host.name)'.format(hostname)
             service_part = host_part + ' && ' + service_part
-        filters['filter'] = service_part
-        return filters
+        return service_part
 
-    def schedule_downtime(self, client, filters, comment, author, duration):
+    def schedule_downtime(self, client, object_type, filters, comment, author, duration):
         """
         Schedule downtime for the provided filter
         """
@@ -52,7 +46,8 @@ class Client:
                 results = []
                 with Timeout(20):
                     host_task = client.actions.schedule_downtime(
-                        filters=filters,
+                        object_type=object_type,
+                        filter=filters,
                         start_time=now,
                         end_time=end_time,
                         duration=duration,
@@ -74,7 +69,7 @@ class Client:
         Schedule host downtime for duration
         """
         host_filter = self.host_filter(host)
-        downtime = self.schedule_downtime(client, host_filter, comment, author, duration)
+        downtime = self.schedule_downtime(client, "Host", host_filter, comment, author, duration)
         return downtime
 
     def schedule_service_downtime(self, client, comment, author,
@@ -85,5 +80,5 @@ class Client:
         Filter on host if specified
         """
         service_filter = self.service_filter(service_name, host)
-        downtime = self.schedule_downtime(client, service_filter, comment, author, duration)
+        downtime = self.schedule_downtime(client, "Service", service_filter, comment, author, duration)
         return downtime
