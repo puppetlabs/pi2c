@@ -21,7 +21,7 @@ class Client:
         """
         Return a filter
         """
-        return 'match("{}", host.name)'.format(hostname)
+        return 'match("{}", host.display_name)'.format(hostname)
 
     def service_filter(self, servicename, hostname=None):
         """
@@ -29,7 +29,7 @@ class Client:
         """
         service_part = 'match("{}", service.name)'.format(servicename)
         if hostname:
-            host_part = 'match("{}", host.name)'.format(hostname)
+            host_part = 'match("{}", host.display_name)'.format(hostname)
             service_part = host_part + ' && ' + service_part
         return service_part
 
